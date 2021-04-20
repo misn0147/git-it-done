@@ -3,45 +3,51 @@ var nameInputEl = document.querySelector("#username");
 var repoContainerEl = document.querySelector("#repos-container");
 var repoSearchTerm = document.querySelector("#repo-search-term");
 
+var formSubmitHandler = function(event) {
+    // prevent page from refreshing
+    event.preventDefault();
+
+    // get value from input element
+    var username = nameInputEl.value.trim();
+
+    if (username) {
+    getUserRepos(username);
+
+      // clear old content
+    repoContainerEl.textContent = '';
+    nameInputEl.value = '';
+    } else {
+    alert('Please enter a GitHub username');
+    }
+};
 
 var getUserRepos = function(user) {
     // format the github api url
-    var apiUrl = "https://api.github.com/users/" + user + "/repos";
+    var apiUrl = 'https://api.github.com/users/' + user + '/repos';
 
     // make a get request to url
     fetch(apiUrl).then(function(response) {
-    if (response.ok) {
+        // request was successful
+        if (response.ok) {
         response.json().then(function(data) {
             displayRepos(data, user);
         });
-    } else {
+        } else {
         alert("Error: " + response.statusText);
-    }
-        console.log(response);
+        }
+    })
+    .catch(function(error) {
+        alert('Unable to connect to GitHub');
     });
 };
 
-getUserRepos('');
-
-
-
-var formSubmitHandler = function(event) {
-    event.preventDefault();
-    //get value from input element
-    var username = nameInputEl.value.trim();
-
-    if(username) {
-        getUserRepos(username);
-        nameInputEl.value = "";
-    } else {
-        alert("Please enter a GitHub username");
-    }
-    console.log(event);
-};
-
-userFormEl.addEventListener("submit", formSubmitHandler);
 
 var displayRepos = function(repos, searchTerm) {
+    // check if api returned any repos
+if (repos.length === 0) {
+    repoContainerEl.textContent = "No repositories found.";
+    return;
+}
     console.log(repos);
     console.log(searchTerm);
     //clear old content
@@ -82,3 +88,5 @@ var displayRepos = function(repos, searchTerm) {
         repoContainerEl.appendChild(repoEl);
     }
 };
+
+userFormEl.addEventListener("submit", formSubmitHandler);
